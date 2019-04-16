@@ -34,6 +34,41 @@ class Property
     db.close()
   end
 
+  def update()
+    db = PG.connect({dbname: "properties", host: "localhost"})
+    sql = "UPDATE properties SET (address, value, number_of_bedrooms, buy_status) = ($1, $2, $3, $4) WHERE id = $5;"
+    values = [@address, @value, @number_of_bedrooms, @buy_status, @id]
+    db.prepare("update", sql)
+    db.exec_prepared("update", values)
+    db.close()
+  end
+
+  def Property.find(id)
+    db = PG.connect({dbname: "properties", host: "localhost"})
+    sql = "SELECT * FROM properties WHERE id = $1;"
+    values = [id]
+    db.prepare("find", sql)
+    hash = db.exec_prepared("find", values)
+    property = hash.map { |property_hash| Property.new(property_hash) }
+    db.close()
+    return property
+  end
+
+  def Property.find_by_address(address)
+    db = PG.connect({dbname: "properties", host: "localhost"})
+    sql = "SELECT * FROM properties WHERE address = $1;"
+    values = [address]
+    db.prepare("find", sql)
+    hash = db.exec_prepared("find", values)
+    property = hash.map { |property_hash| Property.new(property_hash) }
+    db.close()
+    if property == []
+      return nil
+    else
+      return property
+    end
+  end
+
   def Property.all()
     db = PG.connect({dbname: "properties", host: "localhost"})
     sql = "SELECT * FROM properties;"
